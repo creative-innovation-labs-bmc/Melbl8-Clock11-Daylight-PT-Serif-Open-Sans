@@ -5,11 +5,12 @@
   var LAT = -37.8183;
   var LON = 144.9467;
   var STAGE_W = 3840;
-  var PANEL_W = 930;
+  var PANEL_W = 1760;
 
   var stage = document.getElementById('stage');
   var dayEl = document.getElementById('day');
   var dateEl = document.getElementById('date');
+  var stateEl = document.getElementById('state');
   var hhEl = document.getElementById('hh');
   var mmEl = document.getElementById('mm');
   var ssEl = document.getElementById('ss');
@@ -46,18 +47,14 @@
       hourCycle: 'h23', weekday: 'long'
     }).formatToParts(date);
     var out = {};
-    for (var i = 0; i < parts.length; i++) {
-      if (parts[i].type !== 'literal') out[parts[i].type] = parts[i].value;
-    }
+    for (var i = 0; i < parts.length; i++) if (parts[i].type !== 'literal') out[parts[i].type] = parts[i].value;
     return out;
   }
 
   function dateKey(p) { return p.year + '-' + p.month + '-' + p.day; }
 
   function dayOfYear(y, m, d) {
-    var start = Date.UTC(y, 0, 0);
-    var current = Date.UTC(y, m - 1, d);
-    return Math.floor((current - start) / 86400000);
+    return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86400000);
   }
 
   function timezoneOffsetHours(y, m, d) {
@@ -82,10 +79,8 @@
     var lngHour = LON / 15;
     var t = N + (((isSunrise ? 6 : 18) - lngHour) / 24);
     var M = (0.9856 * t) - 3.289;
-    var L = M + (1.916 * Math.sin(rad(M))) + (0.020 * Math.sin(rad(2 * M))) + 282.634;
-    L = norm(L, 360);
-    var RA = deg(Math.atan(0.91764 * Math.tan(rad(L))));
-    RA = norm(RA, 360);
+    var L = norm(M + (1.916 * Math.sin(rad(M))) + (0.020 * Math.sin(rad(2 * M))) + 282.634, 360);
+    var RA = norm(deg(Math.atan(0.91764 * Math.tan(rad(L)))), 360);
     var Lquadrant = Math.floor(L / 90) * 90;
     var RAquadrant = Math.floor(RA / 90) * 90;
     RA = (RA + (Lquadrant - RAquadrant)) / 15;
@@ -93,10 +88,8 @@
     var cosDec = Math.cos(Math.asin(sinDec));
     var cosH = (Math.cos(rad(90.833)) - (sinDec * Math.sin(rad(LAT)))) / (cosDec * Math.cos(rad(LAT)));
     if (cosH > 1 || cosH < -1) return isSunrise ? 6 : 18;
-    var H = isSunrise ? 360 - deg(Math.acos(cosH)) : deg(Math.acos(cosH));
-    H = H / 15;
-    var T = H + RA - (0.06571 * t) - 6.622;
-    return norm(T - lngHour, 24);
+    var H = (isSunrise ? 360 - deg(Math.acos(cosH)) : deg(Math.acos(cosH))) / 15;
+    return norm(H + RA - (0.06571 * t) - 6.622 - lngHour, 24);
   }
 
   function solarTimes(y, m, d) {
@@ -124,18 +117,20 @@
 
   function paletteFor(s) {
     return [
-      [0, [5, 10, 30]],
-      [Math.max(0, s.sunrise - 2.1), [15, 31, 71]],
-      [Math.max(0, s.sunrise - 0.9), [30, 67, 119]],
-      [s.sunrise, [177, 100, 102]],
-      [Math.min(24, s.sunrise + 1.2), [91, 157, 205]],
-      [s.noon, [100, 184, 232]],
-      [Math.max(s.noon, s.sunset - 1.5), [78, 145, 195]],
-      [Math.max(s.noon, s.sunset - 0.55), [214, 151, 87]],
-      [s.sunset, [211, 81, 61]],
-      [Math.min(24, s.sunset + 0.85), [74, 51, 102]],
-      [Math.min(24, s.sunset + 2.0), [9, 21, 50]],
-      [24, [5, 10, 30]]
+      [0, [4, 10, 24]],
+      [Math.max(0, s.sunrise - 2.2), [8, 24, 55]],
+      [Math.max(0, s.sunrise - 1.0), [28, 68, 132]],
+      [s.sunrise, [236, 150, 103]],
+      [Math.min(24, s.sunrise + 1.25), [87, 163, 226]],
+      [Math.max(s.sunrise + 1.25, s.noon - 1.4), [96, 180, 238]],
+      [s.noon, [255, 231, 108]],
+      [Math.min(24, s.noon + 1.1), [123, 190, 239]],
+      [Math.max(s.noon + 1.1, s.sunset - 1.55), [91, 163, 218]],
+      [Math.max(s.noon + 1.1, s.sunset - 0.55), [241, 184, 91]],
+      [s.sunset, [221, 109, 70]],
+      [Math.min(24, s.sunset + 0.9), [75, 58, 111]],
+      [Math.min(24, s.sunset + 2.0), [10, 22, 48]],
+      [24, [4, 10, 24]]
     ];
   }
 
@@ -155,8 +150,8 @@
 
   function buildSky() {
     var stops = [];
-    for (var i = 0; i <= 48; i++) {
-      var hour = i / 2;
+    for (var i = 0; i <= 72; i++) {
+      var hour = i / 3;
       stops.push(rgb(colourAt(hour, solar)) + ' ' + ((hour / 24) * 100).toFixed(3) + '%');
     }
     baseGradient.style.background = 'linear-gradient(90deg,' + stops.join(',') + ')';
@@ -164,21 +159,31 @@
     hourFlows.innerHTML = '';
     for (var h = 0; h < 24; h++) {
       var base = colourAt(h + 0.5, solar);
-      var top = mix(base, [3, 8, 28], 0.38);
-      var bottom = mix(base, [245, 239, 221], 0.13);
+      var top = mix(base, [3, 8, 28], 0.34);
+      var bottom = mix(base, [255, 242, 210], h >= 10 && h <= 15 ? 0.18 : 0.11);
       var flow = document.createElement('div');
       flow.className = 'hour-flow';
       flow.style.left = (((h / 24) * 100) - 0.48) + '%';
-      flow.style.background =
-        'linear-gradient(180deg,' + rgba(top, .72) + ' 0%,' + rgba(base, .20) + ' 48%,' + rgba(bottom, .66) + ' 100%)';
-      flow.style.animationDuration = (18 + ((h * 7) % 11)) + 's';
-      flow.style.animationDelay = (-((h * 2.7) % 21)) + 's';
+      flow.style.background = 'linear-gradient(180deg,' + rgba(top, .74) + ' 0%,' + rgba(base, .22) + ' 48%,' + rgba(bottom, .68) + ' 100%)';
+      flow.style.animationDuration = (19 + ((h * 7) % 10)) + 's';
+      flow.style.animationDelay = (-((h * 2.5) % 20)) + 's';
       hourFlows.appendChild(flow);
     }
   }
 
   function setPercent(el, hour) {
     el.style.left = ((hour / 24) * 100) + '%';
+  }
+
+  function stateFor(decimal) {
+    if (decimal < solar.sunrise - 1.1) return 'DEEP NIGHT';
+    if (decimal < solar.sunrise + 0.6) return 'SUNRISE BUILD';
+    if (decimal < solar.noon - 0.9) return 'MORNING LIGHT';
+    if (decimal < solar.noon + 1.1) return 'SOLAR NOON';
+    if (decimal < solar.sunset - 1.2) return 'AFTERNOON SKY';
+    if (decimal < solar.sunset + 0.8) return 'SUNSET GLOW';
+    if (decimal < solar.sunset + 2.2) return 'BLUE HOUR';
+    return 'NIGHTFALL';
   }
 
   function rebuildForDate(p, now) {
@@ -224,6 +229,7 @@
     ssEl.textContent = p.second;
 
     var decimal = (+p.hour) + (+p.minute / 60) + (+p.second / 3600);
+    stateEl.textContent = stateFor(decimal);
     positionCard(decimal);
   }
 
