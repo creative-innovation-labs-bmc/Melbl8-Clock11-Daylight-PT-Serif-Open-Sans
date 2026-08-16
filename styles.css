@@ -143,30 +143,31 @@ body {
   display:flex;
   align-items:center;
   justify-content:flex-start;
-  gap:.055em;
+  gap:.095em;
   font-family:"PT Serif Local", Georgia, serif;
-  font-size:190px;
+  font-size:188px;
   line-height:.92;
   font-weight:700;
-  letter-spacing:-.025em;
+  letter-spacing:0;
   font-variant-numeric:tabular-nums lining-nums;
   white-space:nowrap;
   color:#fff;
 }
 .num {
   display:inline-block;
-  min-width:1.82ch;
+  min-width:1.98ch;
   text-align:center;
+  letter-spacing:.10em;
 }
 .colon {
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:.48em;
-  margin:0 .015em;
+  width:.50em;
+  margin:0 .022em;
   color:var(--green);
   transform:translateY(-.032em);
-  animation:colonBlink 2s steps(1,end) infinite;
+  animation:colonBlink 2s linear infinite;
 }
 @keyframes colonBlink {
   0%, 49.999% { opacity:1; }
