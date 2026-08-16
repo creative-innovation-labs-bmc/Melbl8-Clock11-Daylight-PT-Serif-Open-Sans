@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
+  <meta name="theme-color" content="#071126">
+  <title>Clock 11 · Daylight Centre</title>
+  <link rel="stylesheet" href="styles-centre.css">
+</head>
+<body>
+  <main id="viewport" aria-label="Melbourne daylight clock centred variant">
+    <section id="stage">
+      <div class="wall-window" aria-hidden="true">
+        <div id="wallTrack" class="wall-track">
+          <div id="hourField" class="hour-field"></div>
+        </div>
+        <div class="sky-depth"></div>
+      </div>
+
+      <div class="centre-guide" aria-hidden="true"></div>
+
+      <section class="centre-card" aria-label="Current Melbourne time">
+        <div class="card-kicker">MELBOURNE <span id="zone" class="zone">AEST</span></div>
+        <div class="time">
+          <span id="hh" class="num">13</span><span class="colon">:</span><span id="mm" class="num">51</span><span class="colon">:</span><span id="ss" class="num">00</span>
+        </div>
+        <div class="meta-row">
+          <span id="day" class="day">SUNDAY</span>
+          <span class="meta-divider"></span>
+          <span id="date" class="date">16 AUGUST 2026</span>
+          <span class="meta-divider short"></span>
+          <span id="state" class="state">DAYLIGHT CLOCK</span>
+        </div>
+        <div class="centre-pointer" aria-hidden="true"></div>
+      </section>
+    </section>
+  </main>
+  <script src="app-centre.js"></script>
+</body>
+</html>
