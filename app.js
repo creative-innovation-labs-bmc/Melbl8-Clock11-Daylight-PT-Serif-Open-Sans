@@ -4,7 +4,8 @@
   var ZONE = 'Australia/Melbourne';
   var LAT = -37.8183;
   var LON = 144.9467;
-  var SEGMENTS = 96;
+  var STAGE_W = 3840;
+  var PANEL_W = 930;
 
   var stage = document.getElementById('stage');
   var dayEl = document.getElementById('day');
@@ -12,15 +13,18 @@
   var hhEl = document.getElementById('hh');
   var mmEl = document.getElementById('mm');
   var ssEl = document.getElementById('ss');
-  var bandEl = document.getElementById('band');
-  var sunriseLabel = document.getElementById('sunriseLabel');
-  var noonLabel = document.getElementById('noonLabel');
-  var sunsetLabel = document.getElementById('sunsetLabel');
+  var baseGradient = document.getElementById('baseGradient');
+  var hourFlows = document.getElementById('hourFlows');
   var sunriseRule = document.getElementById('sunriseRule');
   var noonRule = document.getElementById('noonRule');
   var sunsetRule = document.getElementById('sunsetRule');
-  var marker = document.getElementById('currentMarker');
-  var caption = document.getElementById('currentCaption');
+  var sunriseLabel = document.getElementById('sunriseLabel');
+  var noonLabel = document.getElementById('noonLabel');
+  var sunsetLabel = document.getElementById('sunsetLabel');
+  var timeCard = document.getElementById('timeCard');
+  var cardPointer = document.getElementById('cardPointer');
+  var nowLine = document.getElementById('nowLine');
+  var zoneEl = document.getElementById('zone');
 
   var lastDateKey = '';
   var solar = null;
@@ -64,7 +68,7 @@
       hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'
     }).formatToParts(probe);
     var x = {};
-    for (var i=0;i<fp.length;i++) if (fp[i].type !== 'literal') x[fp[i].type]=fp[i].value;
+    for (var i = 0; i < fp.length; i++) if (fp[i].type !== 'literal') x[fp[i].type] = fp[i].value;
     var asUTC = Date.UTC(+x.year, +x.month - 1, +x.day, +x.hour, +x.minute, +x.second);
     return (asUTC - probe.getTime()) / 3600000;
   }
@@ -99,8 +103,7 @@
     var offset = timezoneOffsetHours(y, m, d);
     var sunrise = norm(solarUTC(y, m, d, true) + offset, 24);
     var sunset = norm(solarUTC(y, m, d, false) + offset, 24);
-    var noon = (sunrise + sunset) / 2;
-    return { sunrise: sunrise, noon: noon, sunset: sunset };
+    return { sunrise: sunrise, noon: (sunrise + sunset) / 2, sunset: sunset };
   }
 
   function fmtHour(decimal) {
@@ -111,6 +114,7 @@
   }
 
   function mix(a, b, t) {
+    t = Math.max(0, Math.min(1, t));
     return [
       Math.round(a[0] + (b[0] - a[0]) * t),
       Math.round(a[1] + (b[1] - a[1]) * t),
@@ -118,63 +122,92 @@
     ];
   }
 
+  function paletteFor(s) {
+    return [
+      [0, [5, 10, 30]],
+      [Math.max(0, s.sunrise - 2.1), [15, 31, 71]],
+      [Math.max(0, s.sunrise - 0.9), [30, 67, 119]],
+      [s.sunrise, [177, 100, 102]],
+      [Math.min(24, s.sunrise + 1.2), [91, 157, 205]],
+      [s.noon, [100, 184, 232]],
+      [Math.max(s.noon, s.sunset - 1.5), [78, 145, 195]],
+      [Math.max(s.noon, s.sunset - 0.55), [214, 151, 87]],
+      [s.sunset, [211, 81, 61]],
+      [Math.min(24, s.sunset + 0.85), [74, 51, 102]],
+      [Math.min(24, s.sunset + 2.0), [9, 21, 50]],
+      [24, [5, 10, 30]]
+    ];
+  }
+
   function colourAt(hour, s) {
-    var dawn0 = s.sunrise - 1.35;
-    var dawn1 = s.sunrise + 1.0;
-    var dusk0 = s.sunset - 1.1;
-    var dusk1 = s.sunset + 1.25;
-    var night = [17, 24, 31];
-    var predawn = [43, 56, 76];
-    var dawn = [201, 170, 137];
-    var day = [222, 229, 226];
-    var noon = [247, 242, 220];
-    var afternoon = [235, 210, 151];
-    var sunset = [221, 112, 67];
-    var dusk = [77, 49, 65];
-
-    if (hour < dawn0) return night;
-    if (hour < s.sunrise) return mix(predawn, dawn, (hour - dawn0) / (s.sunrise - dawn0));
-    if (hour < dawn1) return mix(dawn, day, (hour - s.sunrise) / (dawn1 - s.sunrise));
-    if (hour < s.noon) return mix(day, noon, (hour - dawn1) / Math.max(.01, s.noon - dawn1));
-    if (hour < dusk0) return mix(noon, afternoon, (hour - s.noon) / Math.max(.01, dusk0 - s.noon));
-    if (hour < s.sunset) return mix(afternoon, sunset, (hour - dusk0) / Math.max(.01, s.sunset - dusk0));
-    if (hour < dusk1) return mix(sunset, dusk, (hour - s.sunset) / Math.max(.01, dusk1 - s.sunset));
-    if (hour < dusk1 + 1.2) return mix(dusk, night, (hour - dusk1) / 1.2);
-    return night;
-  }
-
-  function setPos(el, decimalHour) {
-    el.style.left = ((decimalHour / 24) * 100) + '%';
-  }
-
-  function rebuildForDate(p) {
-    var y = +p.year, m = +p.month, d = +p.day;
-    solar = solarTimes(y, m, d);
-    bandEl.innerHTML = '';
-    for (var i = 0; i < SEGMENTS; i++) {
-      var div = document.createElement('div');
-      div.className = 'segment';
-      var hour = (i + 0.5) / SEGMENTS * 24;
-      var c = colourAt(hour, solar);
-      div.style.backgroundColor = 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
-      bandEl.appendChild(div);
+    var p = paletteFor(s);
+    for (var i = 0; i < p.length - 1; i++) {
+      if (hour <= p[i + 1][0]) {
+        var span = Math.max(.001, p[i + 1][0] - p[i][0]);
+        return mix(p[i][1], p[i + 1][1], (hour - p[i][0]) / span);
+      }
     }
+    return p[p.length - 1][1];
+  }
+
+  function rgb(c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; }
+  function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
+
+  function buildSky() {
+    var stops = [];
+    for (var i = 0; i <= 48; i++) {
+      var hour = i / 2;
+      stops.push(rgb(colourAt(hour, solar)) + ' ' + ((hour / 24) * 100).toFixed(3) + '%');
+    }
+    baseGradient.style.background = 'linear-gradient(90deg,' + stops.join(',') + ')';
+
+    hourFlows.innerHTML = '';
+    for (var h = 0; h < 24; h++) {
+      var base = colourAt(h + 0.5, solar);
+      var top = mix(base, [3, 8, 28], 0.38);
+      var bottom = mix(base, [245, 239, 221], 0.13);
+      var flow = document.createElement('div');
+      flow.className = 'hour-flow';
+      flow.style.left = (((h / 24) * 100) - 0.48) + '%';
+      flow.style.background =
+        'linear-gradient(180deg,' + rgba(top, .72) + ' 0%,' + rgba(base, .20) + ' 48%,' + rgba(bottom, .66) + ' 100%)';
+      flow.style.animationDuration = (18 + ((h * 7) % 11)) + 's';
+      flow.style.animationDelay = (-((h * 2.7) % 21)) + 's';
+      hourFlows.appendChild(flow);
+    }
+  }
+
+  function setPercent(el, hour) {
+    el.style.left = ((hour / 24) * 100) + '%';
+  }
+
+  function rebuildForDate(p, now) {
+    solar = solarTimes(+p.year, +p.month, +p.day);
+    buildSky();
+
     sunriseLabel.textContent = 'SUNRISE ' + fmtHour(solar.sunrise);
     noonLabel.textContent = 'SOLAR NOON ' + fmtHour(solar.noon);
     sunsetLabel.textContent = 'SUNSET ' + fmtHour(solar.sunset);
-    setPos(sunriseLabel, solar.sunrise);
-    setPos(noonLabel, solar.noon);
-    setPos(sunsetLabel, solar.sunset);
-    setPos(sunriseRule, solar.sunrise);
-    setPos(noonRule, solar.noon);
-    setPos(sunsetRule, solar.sunset);
+    setPercent(sunriseRule, solar.sunrise);
+    setPercent(noonRule, solar.noon);
+    setPercent(sunsetRule, solar.sunset);
 
     dayEl.textContent = p.weekday.toUpperCase();
-    var dateText = new Intl.DateTimeFormat('en-AU', {
+    dateEl.textContent = new Intl.DateTimeFormat('en-AU', {
       timeZone: ZONE,
       day:'2-digit', month:'long', year:'numeric'
-    }).format(new Date());
-    dateEl.textContent = dateText.toUpperCase();
+    }).format(now).toUpperCase();
+    zoneEl.textContent = timezoneOffsetHours(+p.year, +p.month, +p.day) >= 10.5 ? 'AEDT' : 'AEST';
+  }
+
+  function positionCard(decimal) {
+    var markerX = (decimal / 24) * STAGE_W;
+    var panelX = Math.max(0, Math.min(STAGE_W - PANEL_W, markerX - PANEL_W / 2));
+    var tipX = markerX - panelX;
+
+    timeCard.style.transform = 'translate3d(' + panelX.toFixed(2) + 'px,0,0)';
+    cardPointer.style.transform = 'translate3d(' + tipX.toFixed(2) + 'px,0,0)';
+    nowLine.style.transform = 'translate3d(' + markerX.toFixed(2) + 'px,0,0)';
   }
 
   function update() {
@@ -183,7 +216,7 @@
     var key = dateKey(p);
     if (key !== lastDateKey) {
       lastDateKey = key;
-      rebuildForDate(p);
+      rebuildForDate(p, now);
     }
 
     hhEl.textContent = p.hour;
@@ -191,12 +224,12 @@
     ssEl.textContent = p.second;
 
     var decimal = (+p.hour) + (+p.minute / 60) + (+p.second / 3600);
-    setPos(marker, decimal);
-    var captionPct = Math.max(4, Math.min(96, (decimal / 24) * 100));
-    caption.style.left = captionPct + '%';
-    caption.textContent = 'CURRENT TIME ' + p.hour + ':' + p.minute;
+    positionCard(decimal);
   }
 
+  document.addEventListener('visibilitychange', function () {
+    document.body.classList.toggle('paused', document.hidden);
+  });
   window.addEventListener('resize', resizeStage, { passive:true });
   resizeStage();
   update();
