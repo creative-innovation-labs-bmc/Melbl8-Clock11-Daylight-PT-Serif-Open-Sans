@@ -26,6 +26,7 @@
   var cardPointer = document.getElementById('cardPointer');
   var nowLine = document.getElementById('nowLine');
   var zoneEl = document.getElementById('zone');
+  var timeline = document.querySelector('.timeline');
 
   var lastDateKey = '';
   var solar = null;
@@ -37,6 +38,19 @@
     stage.style.transform = 'scale(' + scale + ')';
     stage.style.left = ((window.innerWidth - w) / 2) + 'px';
     stage.style.top = ((window.innerHeight - h) / 2) + 'px';
+  }
+
+  function buildTimeline() {
+    timeline.innerHTML = '';
+    for (var h = 0; h <= 24; h++) {
+      var mark = document.createElement('div');
+      mark.className = 'hour-mark' + ((h % 6 === 0) ? ' major' : '') + (h === 0 ? ' first' : '') + (h === 24 ? ' last' : '');
+      mark.style.left = ((h / 24) * 100) + '%';
+      var label = document.createElement('span');
+      label.textContent = (h % 6 === 0) ? String(h).padStart(2, '0') + ':00' : String(h).padStart(2, '0');
+      mark.appendChild(label);
+      timeline.appendChild(mark);
+    }
   }
 
   function partsFor(date) {
@@ -52,10 +66,7 @@
   }
 
   function dateKey(p) { return p.year + '-' + p.month + '-' + p.day; }
-
-  function dayOfYear(y, m, d) {
-    return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86400000);
-  }
+  function dayOfYear(y, m, d) { return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86400000); }
 
   function timezoneOffsetHours(y, m, d) {
     var probe = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
@@ -171,9 +182,7 @@
     }
   }
 
-  function setPercent(el, hour) {
-    el.style.left = ((hour / 24) * 100) + '%';
-  }
+  function setPercent(el, hour) { el.style.left = ((hour / 24) * 100) + '%'; }
 
   function stateFor(decimal) {
     if (decimal < solar.sunrise - 1.1) return 'DEEP NIGHT';
@@ -209,7 +218,6 @@
     var markerX = (decimal / 24) * STAGE_W;
     var panelX = Math.max(0, Math.min(STAGE_W - PANEL_W, markerX - PANEL_W / 2));
     var tipX = markerX - panelX;
-
     timeCard.style.transform = 'translate3d(' + panelX.toFixed(2) + 'px,0,0)';
     cardPointer.style.transform = 'translate3d(' + tipX.toFixed(2) + 'px,0,0)';
     nowLine.style.transform = 'translate3d(' + markerX.toFixed(2) + 'px,0,0)';
@@ -233,6 +241,7 @@
     positionCard(decimal);
   }
 
+  buildTimeline();
   document.addEventListener('visibilitychange', function () {
     document.body.classList.toggle('paused', document.hidden);
   });
