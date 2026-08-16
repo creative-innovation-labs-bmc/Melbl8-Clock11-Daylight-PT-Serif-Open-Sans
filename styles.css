@@ -167,7 +167,7 @@ body {
   margin:0 .022em;
   color:var(--green);
   transform:translateY(-.032em);
-  animation:colonBlink 2s linear infinite;
+  animation:colonBlink 1s linear infinite;
 }
 @keyframes colonBlink {
   0%, 49.999% { opacity:1; }
