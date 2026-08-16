@@ -20,6 +20,15 @@
   var ssEl = document.getElementById('ss');
   var zoneEl = document.getElementById('zone');
 
+  var hourRail = document.createElement('div');
+  hourRail.className = 'moving-hour-rail';
+  stage.appendChild(hourRail);
+
+  var currentReadout = document.createElement('div');
+  currentReadout.className = 'current-readout';
+  currentReadout.textContent = 'CURRENT 00:00';
+  stage.appendChild(currentReadout);
+
   var lastDateKey = '';
   var solar = null;
 
@@ -30,6 +39,21 @@
     stage.style.transform = 'scale(' + scale + ')';
     stage.style.left = ((window.innerWidth - w) / 2) + 'px';
     stage.style.top = ((window.innerHeight - h) / 2) + 'px';
+  }
+
+  function buildHourRail() {
+    hourRail.innerHTML = '';
+    for (var cycle = 0; cycle < 3; cycle++) {
+      for (var h = 0; h < 24; h++) {
+        var mark = document.createElement('div');
+        mark.className = 'rail-mark' + ((h % 6 === 0) ? ' major' : '');
+        mark.style.left = ((cycle * DAY_W) + (h * HOUR_W) + (HOUR_W / 2)) + 'px';
+        var label = document.createElement('span');
+        label.textContent = (h % 6 === 0) ? String(h).padStart(2, '0') + ':00' : String(h).padStart(2, '0');
+        mark.appendChild(label);
+        hourRail.appendChild(mark);
+      }
+    }
   }
 
   function partsFor(date) {
@@ -43,7 +67,6 @@
     for (var i = 0; i < parts.length; i++) if (parts[i].type !== 'literal') out[parts[i].type] = parts[i].value;
     return out;
   }
-
   function dateKey(p) { return p.year + '-' + p.month + '-' + p.day; }
   function dayOfYear(y, m, d) { return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86400000); }
   function norm(v, max) { v = v % max; return v < 0 ? v + max : v; }
@@ -142,7 +165,6 @@
         var col = document.createElement('div');
         col.className = 'hour-col';
         col.setAttribute('data-hour', String(h));
-        col.style.width = HOUR_W + 'px';
         hourField.appendChild(col);
       }
     }
@@ -186,7 +208,9 @@
     var currentInDay = (decimal / 24) * DAY_W;
     var currentInMiddleCycle = DAY_W + currentInDay;
     var x = (STAGE_W / 2) - currentInMiddleCycle;
-    wallTrack.style.transform = 'translate3d(' + x.toFixed(2) + 'px,0,0)';
+    var transform = 'translate3d(' + x.toFixed(2) + 'px,0,0)';
+    wallTrack.style.transform = transform;
+    hourRail.style.transform = transform;
   }
 
   function update() {
@@ -204,10 +228,12 @@
 
     var decimal = (+p.hour) + (+p.minute / 60) + (+p.second / 3600);
     stateEl.textContent = stateFor(decimal);
+    currentReadout.textContent = 'CURRENT ' + p.hour + ':' + p.minute;
     positionWall(decimal);
   }
 
   buildWall();
+  buildHourRail();
   document.addEventListener('visibilitychange', function () {
     document.body.classList.toggle('paused', document.hidden);
   });
