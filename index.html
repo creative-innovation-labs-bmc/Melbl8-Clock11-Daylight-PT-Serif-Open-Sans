@@ -4,49 +4,51 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
-  <meta name="theme-color" content="#373a36">
-  <title>Clock 11 · Daylight</title>
+  <meta name="theme-color" content="#071126">
+  <title>Clock 11 · Daylight Flow</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main id="viewport" aria-label="Melbourne daylight clock">
     <section id="stage">
-      <header class="meta" aria-label="Date and location">
-        <div id="day" class="day">SUNDAY</div>
-        <div id="date" class="date">16 AUGUST 2026</div>
-        <div class="location"><span class="location-dot"></span>MELBOURNE</div>
-      </header>
+      <div class="sky" aria-hidden="true">
+        <div id="baseGradient" class="base-gradient"></div>
+        <div id="hourFlows" class="hour-flows"></div>
+        <div class="sky-depth"></div>
+      </div>
 
-      <section class="hero" aria-label="Current Melbourne time">
-        <div class="time" aria-live="off">
-          <span id="hh">13</span><span class="colon">:</span><span id="mm">28</span><span class="colon">:</span><span id="ss">00</span>
+      <div class="solar-layer" aria-hidden="true">
+        <div id="sunriseRule" class="solar-rule"><span id="sunriseLabel">SUNRISE 07:02</span></div>
+        <div id="noonRule" class="solar-rule noon"><span id="noonLabel">SOLAR NOON 12:15</span></div>
+        <div id="sunsetRule" class="solar-rule"><span id="sunsetLabel">SUNSET 17:43</span></div>
+      </div>
+
+      <section id="timeCard" class="time-card" aria-label="Current Melbourne time">
+        <div class="card-meta">
+          <span id="day">SUNDAY</span>
+          <span class="meta-divider"></span>
+          <span id="date">16 AUGUST 2026</span>
         </div>
+        <div class="time">
+          <span id="hh">13</span><span class="colon">:</span><span id="mm">51</span><span class="colon">:</span><span id="ss">00</span>
+        </div>
+        <div class="card-footer">
+          <span class="location-dot"></span>
+          <span>MELBOURNE</span>
+          <span id="zone" class="zone">AEST</span>
+        </div>
+        <div id="cardPointer" class="card-pointer" aria-hidden="true"></div>
       </section>
 
-      <section class="daylight" aria-label="Twenty four hour daylight cycle">
-        <div class="event-label event-sunrise" id="sunriseLabel">SUNRISE 07:02</div>
-        <div class="event-label event-noon" id="noonLabel">SOLAR NOON 12:15</div>
-        <div class="event-label event-sunset" id="sunsetLabel">SUNSET 17:43</div>
+      <div id="nowLine" class="now-line" aria-hidden="true"><span></span></div>
 
-        <div class="band-wrap">
-          <div id="band" class="band" aria-hidden="true"></div>
-          <div id="sunriseRule" class="event-rule"></div>
-          <div id="noonRule" class="event-rule noon"></div>
-          <div id="sunsetRule" class="event-rule"></div>
-          <div id="currentMarker" class="current-marker">
-            <div class="marker-head"></div>
-          </div>
-        </div>
-
-        <div class="ticks" aria-hidden="true">
-          <span style="left:0%">00:00</span>
-          <span style="left:25%">06:00</span>
-          <span style="left:50%">12:00</span>
-          <span style="left:75%">18:00</span>
-          <span style="left:100%">24:00</span>
-        </div>
-        <div class="current-caption" id="currentCaption">CURRENT TIME 13:28</div>
-      </section>
+      <div class="timeline" aria-hidden="true">
+        <span style="left:0%">00:00</span>
+        <span style="left:25%">06:00</span>
+        <span style="left:50%">12:00</span>
+        <span style="left:75%">18:00</span>
+        <span style="left:100%">24:00</span>
+      </div>
     </section>
   </main>
   <script src="app.js"></script>
