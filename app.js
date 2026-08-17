@@ -7,6 +7,14 @@
   var STAGE_W = 3840;
   var PANEL_W = 1760;
 
+  var params = new URLSearchParams(window.location.search);
+  var requestedWave = Number(params.get('wave'));
+  var WAVE_SWEEP = (requestedWave === 5 || requestedWave === 7 || requestedWave === 10) ? requestedWave : 10;
+  var WAVE_ACTIVE = 1;
+  var WAVE_OFFSET = WAVE_SWEEP / 24;
+  var waveAnimations = [];
+  var lastHighlightedHour = -1;
+
   var stage = document.getElementById('stage');
   var dayEl = document.getElementById('day');
   var dateEl = document.getElementById('date');
@@ -159,6 +167,50 @@
   function rgb(c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; }
   function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
 
+  function gradientForHour(h, highlighted) {
+    var base = colourAt(h + 0.5, solar);
+    if (highlighted) base = mix(base, [255, 255, 255], 0.18);
+    var top = mix(base, [3, 8, 28], highlighted ? 0.22 : 0.34);
+    var bottom = mix(base, [255, 242, 210], h >= 10 && h <= 15 ? (highlighted ? 0.30 : 0.18) : (highlighted ? 0.19 : 0.11));
+    return 'linear-gradient(180deg,' + rgba(top, highlighted ? .88 : .74) + ' 0%,' + rgba(base, highlighted ? .42 : .22) + ' 48%,' + rgba(bottom, highlighted ? .82 : .68) + ' 100%)';
+  }
+
+  function cancelWaveAnimations() {
+    for (var i = 0; i < waveAnimations.length; i++) waveAnimations[i].cancel();
+    waveAnimations = [];
+  }
+
+  function startWaveAnimations() {
+    cancelWaveAnimations();
+    if (!Element.prototype.animate) return;
+
+    var activeFraction = WAVE_ACTIVE / WAVE_SWEEP;
+    var phaseSeconds = (Date.now() / 1000) % WAVE_SWEEP;
+    var flows = hourFlows.children;
+
+    for (var i = 0; i < flows.length; i++) {
+      var h = Number(flows[i].getAttribute('data-hour'));
+      flows[i].style.setProperty('animation-name', 'none', 'important');
+      flows[i].style.setProperty('animation-duration', '0s', 'important');
+      flows[i].style.setProperty('animation-delay', '0s', 'important');
+      var delaySeconds = (h * WAVE_OFFSET) - phaseSeconds;
+
+      waveAnimations.push(flows[i].animate([
+        { transform:'translate3d(0,0,0) scaleY(1.02)', offset:0 },
+        { transform:'translate3d(0,-48px,0) scaleY(1.075)', offset:activeFraction * 0.40 },
+        { transform:'translate3d(0,24px,0) scaleY(1.045)', offset:activeFraction * 0.72 },
+        { transform:'translate3d(0,0,0) scaleY(1.02)', offset:activeFraction },
+        { transform:'translate3d(0,0,0) scaleY(1.02)', offset:1 }
+      ], {
+        duration: WAVE_SWEEP * 1000,
+        delay: delaySeconds * 1000,
+        iterations: Infinity,
+        easing: 'linear',
+        fill: 'both'
+      }));
+    }
+  }
+
   function buildSky() {
     var stops = [];
     for (var i = 0; i <= 72; i++) {
@@ -169,16 +221,28 @@
 
     hourFlows.innerHTML = '';
     for (var h = 0; h < 24; h++) {
-      var base = colourAt(h + 0.5, solar);
-      var top = mix(base, [3, 8, 28], 0.34);
-      var bottom = mix(base, [255, 242, 210], h >= 10 && h <= 15 ? 0.18 : 0.11);
       var flow = document.createElement('div');
       flow.className = 'hour-flow';
+      flow.setAttribute('data-hour', String(h));
       flow.style.left = (((h / 24) * 100) - 0.48) + '%';
-      flow.style.background = 'linear-gradient(180deg,' + rgba(top, .74) + ' 0%,' + rgba(base, .22) + ' 48%,' + rgba(bottom, .68) + ' 100%)';
-      flow.style.animationDuration = (19 + ((h * 7) % 10)) + 's';
-      flow.style.animationDelay = (-((h * 2.5) % 20)) + 's';
+      flow.style.background = gradientForHour(h, false);
+      flow.style.opacity = '.50';
       hourFlows.appendChild(flow);
+    }
+    lastHighlightedHour = -1;
+    startWaveAnimations();
+  }
+
+  function highlightCurrentHour(currentHour) {
+    if (currentHour === lastHighlightedHour) return;
+    lastHighlightedHour = currentHour;
+    var flows = hourFlows.children;
+    for (var i = 0; i < flows.length; i++) {
+      var h = Number(flows[i].getAttribute('data-hour'));
+      var current = h === currentHour;
+      flows[i].style.opacity = current ? '.86' : '.50';
+      flows[i].style.background = gradientForHour(h, current);
+      flows[i].style.zIndex = current ? '2' : '0';
     }
   }
 
@@ -236,7 +300,9 @@
     mmEl.textContent = p.minute;
     ssEl.textContent = p.second;
 
-    var decimal = (+p.hour) + (+p.minute / 60) + (+p.second / 3600);
+    var currentHour = +p.hour;
+    var decimal = currentHour + (+p.minute / 60) + (+p.second / 3600);
+    highlightCurrentHour(currentHour);
     stateEl.textContent = stateFor(decimal);
     positionCard(decimal);
   }
@@ -244,6 +310,7 @@
   buildTimeline();
   document.addEventListener('visibilitychange', function () {
     document.body.classList.toggle('paused', document.hidden);
+    if (!document.hidden) startWaveAnimations();
   });
   window.addEventListener('resize', resizeStage, { passive:true });
   resizeStage();
