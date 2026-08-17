@@ -70,10 +70,16 @@ body {
   margin-top:-40px;
   transform:translate3d(0,0,0);
   will-change:transform;
-  animation-timing-function:ease-in-out;
-  animation-iteration-count:infinite;
-  animation-direction:alternate;
+  animation-duration:10s !important;
+  animation-delay:0s !important;
+  animation-timing-function:cubic-bezier(.42,0,.24,1) !important;
+  animation-iteration-count:infinite !important;
+  animation-direction:normal !important;
 }
+.hour-col:nth-child(4n+1) { animation-name:hourBreathA !important; }
+.hour-col:nth-child(4n+2) { animation-name:hourBreathB !important; }
+.hour-col:nth-child(4n+3) { animation-name:hourBreathC !important; }
+.hour-col:nth-child(4n)   { animation-name:hourBreathD !important; }
 .hour-col::before {
   content:"";
   position:absolute;
@@ -98,8 +104,30 @@ body {
     linear-gradient(90deg, rgba(0,0,0,.08) 0%, transparent 8%, transparent 92%, rgba(0,0,0,.08) 100%);
 }
 
-@keyframes driftA { from { transform:translate3d(0,-15px,0) scaleY(1.015); } to { transform:translate3d(0,16px,0) scaleY(1.02); } }
-@keyframes driftB { from { transform:translate3d(0,14px,0) scaleY(1.015); } to { transform:translate3d(0,-14px,0) scaleY(1.02); } }
+@keyframes hourBreathA {
+  0%,100% { transform:translate3d(0,0,0) scaleY(1.018); }
+  23% { transform:translate3d(0,-18px,0) scaleY(1.026); }
+  56% { transform:translate3d(0,11px,0) scaleY(1.014); }
+  79% { transform:translate3d(0,-5px,0) scaleY(1.021); }
+}
+@keyframes hourBreathB {
+  0%,100% { transform:translate3d(0,0,0) scaleY(1.018); }
+  31% { transform:translate3d(0,14px,0) scaleY(1.014); }
+  63% { transform:translate3d(0,-15px,0) scaleY(1.027); }
+  84% { transform:translate3d(0,6px,0) scaleY(1.020); }
+}
+@keyframes hourBreathC {
+  0%,100% { transform:translate3d(0,0,0) scaleY(1.018); }
+  18% { transform:translate3d(0,-8px,0) scaleY(1.023); }
+  47% { transform:translate3d(0,17px,0) scaleY(1.013); }
+  74% { transform:translate3d(0,-12px,0) scaleY(1.026); }
+}
+@keyframes hourBreathD {
+  0%,100% { transform:translate3d(0,0,0) scaleY(1.018); }
+  27% { transform:translate3d(0,9px,0) scaleY(1.015); }
+  52% { transform:translate3d(0,-17px,0) scaleY(1.027); }
+  82% { transform:translate3d(0,13px,0) scaleY(1.014); }
+}
 
 .moving-hour-rail {
   position:absolute;
@@ -282,4 +310,4 @@ body {
   .colon { animation:none !important; opacity:1; }
 }
 
-.paused .hour-col { animation-play-state:paused; }
+.paused .hour-col { animation-play-state:paused !important; }
