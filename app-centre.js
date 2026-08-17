@@ -9,6 +9,14 @@
   var DAY_W = 3840;
   var HOUR_W = 160;
 
+  var params = new URLSearchParams(window.location.search);
+  var requestedWave = Number(params.get('wave'));
+  var WAVE_SWEEP = (requestedWave === 5 || requestedWave === 7 || requestedWave === 10) ? requestedWave : 10;
+  var WAVE_ACTIVE = 1;
+  var WAVE_OFFSET = WAVE_SWEEP / 24;
+  var waveAnimations = [];
+  var lastHighlightedHour = -1;
+
   var stage = document.getElementById('stage');
   var wallTrack = document.getElementById('wallTrack');
   var hourField = document.getElementById('hourField');
@@ -152,10 +160,47 @@
 
   function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
 
-  function verticalGradient(base, hour) {
-    var top = mix(base, [3, 8, 28], 0.32);
-    var bottom = mix(base, [255, 242, 210], hour >= 10 && hour <= 15 ? 0.20 : 0.11);
+  function verticalGradient(base, hour, highlighted) {
+    if (highlighted) base = mix(base, [255, 255, 255], 0.18);
+    var top = mix(base, [3, 8, 28], highlighted ? 0.20 : 0.32);
+    var bottom = mix(base, [255, 242, 210], hour >= 10 && hour <= 15 ? (highlighted ? 0.31 : 0.20) : (highlighted ? 0.20 : 0.11));
     return 'linear-gradient(180deg,' + rgba(top, .96) + ' 0%,' + rgba(base, 1) + ' 48%,' + rgba(bottom, .96) + ' 100%)';
+  }
+
+  function cancelWaveAnimations() {
+    for (var i = 0; i < waveAnimations.length; i++) waveAnimations[i].cancel();
+    waveAnimations = [];
+  }
+
+  function startWaveAnimations() {
+    cancelWaveAnimations();
+    if (!Element.prototype.animate) return;
+
+    var activeFraction = WAVE_ACTIVE / WAVE_SWEEP;
+    var phaseSeconds = (Date.now() / 1000) % WAVE_SWEEP;
+    var cols = hourField.children;
+
+    for (var i = 0; i < cols.length; i++) {
+      var h = Number(cols[i].getAttribute('data-hour'));
+      cols[i].style.setProperty('animation-name', 'none', 'important');
+      cols[i].style.setProperty('animation-duration', '0s', 'important');
+      cols[i].style.setProperty('animation-delay', '0s', 'important');
+      var delaySeconds = (h * WAVE_OFFSET) - phaseSeconds;
+
+      waveAnimations.push(cols[i].animate([
+        { transform:'translate3d(0,0,0) scaleY(1.02)', offset:0 },
+        { transform:'translate3d(0,-50px,0) scaleY(1.075)', offset:activeFraction * 0.40 },
+        { transform:'translate3d(0,25px,0) scaleY(1.045)', offset:activeFraction * 0.72 },
+        { transform:'translate3d(0,0,0) scaleY(1.02)', offset:activeFraction },
+        { transform:'translate3d(0,0,0) scaleY(1.02)', offset:1 }
+      ], {
+        duration: WAVE_SWEEP * 1000,
+        delay: delaySeconds * 1000,
+        iterations: Infinity,
+        easing: 'linear',
+        fill: 'both'
+      }));
+    }
   }
 
   function buildWall() {
@@ -173,12 +218,22 @@
   function colourWall() {
     var cols = hourField.children;
     for (var i = 0; i < cols.length; i++) {
-      var hour = (+cols[i].getAttribute('data-hour')) + 0.5;
-      var base = colourAt(hour, solar);
-      cols[i].style.background = verticalGradient(base, hour);
-      cols[i].style.animationName = (i % 2 === 0) ? 'driftA' : 'driftB';
-      cols[i].style.animationDuration = (20 + ((i * 5) % 10)) + 's';
-      cols[i].style.animationDelay = (-((i * 1.7) % 22)) + 's';
+      var h = Number(cols[i].getAttribute('data-hour'));
+      cols[i].style.background = verticalGradient(colourAt(h + 0.5, solar), h + 0.5, false);
+    }
+    lastHighlightedHour = -1;
+    startWaveAnimations();
+  }
+
+  function highlightCurrentHour(currentHour) {
+    if (currentHour === lastHighlightedHour) return;
+    lastHighlightedHour = currentHour;
+    var cols = hourField.children;
+    for (var i = 0; i < cols.length; i++) {
+      var h = Number(cols[i].getAttribute('data-hour'));
+      var current = h === currentHour;
+      cols[i].style.background = verticalGradient(colourAt(h + 0.5, solar), h + 0.5, current);
+      cols[i].style.zIndex = current ? '2' : '0';
     }
   }
 
@@ -226,7 +281,9 @@
     mmEl.textContent = p.minute;
     ssEl.textContent = p.second;
 
-    var decimal = (+p.hour) + (+p.minute / 60) + (+p.second / 3600);
+    var currentHour = +p.hour;
+    var decimal = currentHour + (+p.minute / 60) + (+p.second / 3600);
+    highlightCurrentHour(currentHour);
     stateEl.textContent = stateFor(decimal);
     currentReadout.textContent = 'CURRENT ' + p.hour + ':' + p.minute;
     positionWall(decimal);
@@ -236,6 +293,7 @@
   buildHourRail();
   document.addEventListener('visibilitychange', function () {
     document.body.classList.toggle('paused', document.hidden);
+    if (!document.hidden) startWaveAnimations();
   });
   window.addEventListener('resize', resizeStage, { passive:true });
   resizeStage();
