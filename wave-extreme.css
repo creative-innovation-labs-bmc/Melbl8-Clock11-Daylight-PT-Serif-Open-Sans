@@ -1,0 +1,36 @@
+.hour-flow,
+.hour-col {
+  transform-origin:50% 50%;
+}
+
+.hour-flow::before,
+.hour-col::before {
+  content:"";
+  position:absolute;
+  inset:-18% 0;
+  pointer-events:none;
+  background:linear-gradient(
+    180deg,
+    rgba(0,0,0,.22) 0%,
+    rgba(0,0,0,.08) 18%,
+    rgba(255,255,255,.08) 32%,
+    rgba(255,255,255,.34) 46%,
+    rgba(255,255,255,.12) 58%,
+    rgba(0,0,0,.12) 76%,
+    rgba(0,0,0,.28) 100%
+  );
+  opacity:.78;
+}
+
+.hour-flow[data-current-hour="true"]::before,
+.hour-col[data-current-hour="true"]::before {
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.05) 0%,
+    rgba(255,255,255,.18) 25%,
+    rgba(255,255,255,.52) 46%,
+    rgba(255,255,255,.20) 64%,
+    rgba(0,0,0,.16) 100%
+  );
+  opacity:1;
+}
