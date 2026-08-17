@@ -57,11 +57,16 @@ body {
   opacity:.38;
   transform:translate3d(0,0,0);
   will-change:transform;
-  animation-name:hourDrift;
-  animation-timing-function:ease-in-out;
+  animation-duration:10s !important;
+  animation-delay:0s !important;
+  animation-timing-function:cubic-bezier(.42,0,.24,1);
   animation-iteration-count:infinite;
-  animation-direction:alternate;
+  animation-direction:normal !important;
 }
+.hour-flow:nth-child(4n+1) { animation-name:hourBreathA !important; }
+.hour-flow:nth-child(4n+2) { animation-name:hourBreathB !important; }
+.hour-flow:nth-child(4n+3) { animation-name:hourBreathC !important; }
+.hour-flow:nth-child(4n)   { animation-name:hourBreathD !important; }
 .sky-depth {
   pointer-events:none;
   background:
@@ -69,10 +74,29 @@ body {
     linear-gradient(90deg, rgba(0,0,0,.10) 0%, transparent 8%, transparent 92%, rgba(0,0,0,.10) 100%);
 }
 
-@keyframes hourDrift {
-  0%   { transform:translate3d(0,-14px,0) scaleY(1.025); }
-  48%  { transform:translate3d(0,7px,0) scaleY(1.012); }
-  100% { transform:translate3d(0,17px,0) scaleY(1.035); }
+@keyframes hourBreathA {
+  0%,100% { transform:translate3d(0,0,0) scaleY(1.018); }
+  23% { transform:translate3d(0,-18px,0) scaleY(1.026); }
+  56% { transform:translate3d(0,11px,0) scaleY(1.014); }
+  79% { transform:translate3d(0,-5px,0) scaleY(1.021); }
+}
+@keyframes hourBreathB {
+  0%,100% { transform:translate3d(0,0,0) scaleY(1.018); }
+  31% { transform:translate3d(0,14px,0) scaleY(1.014); }
+  63% { transform:translate3d(0,-15px,0) scaleY(1.027); }
+  84% { transform:translate3d(0,6px,0) scaleY(1.020); }
+}
+@keyframes hourBreathC {
+  0%,100% { transform:translate3d(0,0,0) scaleY(1.018); }
+  18% { transform:translate3d(0,-8px,0) scaleY(1.023); }
+  47% { transform:translate3d(0,17px,0) scaleY(1.013); }
+  74% { transform:translate3d(0,-12px,0) scaleY(1.026); }
+}
+@keyframes hourBreathD {
+  0%,100% { transform:translate3d(0,0,0) scaleY(1.018); }
+  27% { transform:translate3d(0,9px,0) scaleY(1.015); }
+  52% { transform:translate3d(0,-17px,0) scaleY(1.027); }
+  82% { transform:translate3d(0,13px,0) scaleY(1.014); }
 }
 
 .solar-layer { position:absolute; inset:0; pointer-events:none; z-index:2; }
@@ -106,7 +130,7 @@ body {
   width:var(--panel-w);
   min-height:var(--panel-h);
   z-index:5;
-  padding:32px 42px 36px;
+  padding:32px 24px 36px 36px;
   background:rgba(0,0,0,.50);
   border:1px solid rgba(255,255,255,.18);
   border-radius:28px;
@@ -115,20 +139,21 @@ body {
   transition:transform 1000ms linear;
   will-change:transform;
   display:grid;
-  grid-template-columns:1.85fr 1fr;
-  gap:52px;
+  grid-template-columns:minmax(0,2.15fr) minmax(330px,.72fr);
+  gap:28px;
   align-items:center;
   backdrop-filter:blur(4px);
 }
 .card-left { min-width:0; }
 .card-right {
   min-width:0;
-  padding-left:34px;
+  padding-left:26px;
   border-left:1px solid rgba(255,255,255,.15);
   display:flex;
   flex-direction:column;
   align-items:flex-start;
   justify-content:center;
+  transform:translateY(10px);
 }
 .card-kicker {
   font-size:20px;
@@ -285,7 +310,7 @@ body {
 .hour-mark.last span { transform:translateX(-100%); left:-10px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .hour-flow { animation:none !important; }
+  .hour-flow { animation:none !important; transform:none !important; }
   .time-card, .card-pointer, .now-line { transition:none !important; }
   .colon { animation:none !important; opacity:1; }
 }
