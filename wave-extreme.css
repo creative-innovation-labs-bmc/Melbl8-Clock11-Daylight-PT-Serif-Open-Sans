@@ -54,54 +54,149 @@
   opacity:1;
 }
 
-/* Tighter moving-panel composition. The 90px left offset compensates for
-   the visually narrower card while preserving the original marker maths. */
+/* Moving panel QC: keep the visual card and JS positioning maths on the
+   same 1760px width. Remove the previous 90px compensation hack. */
 .time-card {
-  left:90px !important;
-  width:1580px !important;
-  grid-template-columns:minmax(0,1fr) 350px !important;
+  left:0 !important;
+  width:1760px !important;
+  grid-template-columns:minmax(0,1fr) 370px !important;
   gap:18px !important;
-  padding:30px 14px 34px 34px !important;
+  padding:30px 22px 34px 34px !important;
+  align-items:stretch !important;
+}
+.time-card .card-left {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
 }
 .time-card .card-right {
-  padding-left:18px !important;
-  transform:translateY(0) !important;
+  padding:36px 0 0 22px !important;
+  transform:none !important;
+  justify-content:flex-start !important;
+  align-items:flex-start !important;
 }
 .time-card .day {
-  font-size:56px !important;
+  font-size:54px !important;
+  line-height:.98 !important;
 }
 .time-card .date {
-  margin-top:14px !important;
+  margin-top:13px !important;
+  font-size:27px !important;
 }
 .time-card .state {
-  margin-top:18px !important;
+  margin-top:17px !important;
+  font-size:17px !important;
 }
 .time-card .card-pointer {
-  margin-left:-117px !important;
+  margin-left:-27px !important;
 }
 
-/* Tighter centred card with much less empty side padding. */
+/* Centre card: tighter hero block and a cleaner, single baseline for the
+   secondary information rather than a loose row at the bottom. */
 .centre-card {
-  width:1280px !important;
-  padding-left:18px !important;
-  padding-right:18px !important;
+  width:1240px !important;
+  min-height:262px !important;
+  padding:26px 18px 24px !important;
+}
+.centre-card .meta-row {
+  margin-top:17px !important;
+  padding-top:13px !important;
+  gap:12px !important;
+  border-top:1px solid rgba(255,255,255,.12);
+}
+.centre-card .day,
+.centre-card .date,
+.centre-card .state {
+  font-size:20px !important;
+  line-height:1 !important;
+  letter-spacing:.10em !important;
+}
+.centre-card .meta-divider,
+.centre-card .meta-divider.short {
+  width:18px !important;
+  background:rgba(255,255,255,.26) !important;
+}
+
+/* Clean lower time rail on the centred version. */
+.moving-hour-rail::after {
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:54px;
+  height:1px;
+  background:rgba(255,255,255,.18);
+}
+.rail-mark {
+  bottom:54px !important;
+  height:7px !important;
+  background:rgba(255,255,255,.25) !important;
+}
+.rail-mark.major {
+  height:12px !important;
+  background:rgba(255,255,255,.48) !important;
+}
+.rail-mark span {
+  top:12px !important;
+  font-size:13px !important;
+  color:rgba(255,255,255,.48) !important;
+}
+.rail-mark.major span {
+  top:15px !important;
+  font-size:15px !important;
+  color:rgba(255,255,255,.68) !important;
+}
+.current-readout {
+  bottom:14px !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:none !important;
+  font-size:14px !important;
+  letter-spacing:.14em !important;
+  color:rgba(255,255,255,.72) !important;
+}
+.current-readout::before {
+  content:"";
+  display:inline-block;
+  width:7px;
+  height:7px;
+  margin-right:9px;
+  border-radius:50%;
+  background:#89c925;
+  vertical-align:1px;
+}
+.centre-guide {
+  top:470px !important;
+  bottom:54px !important;
+  width:1px !important;
+  margin-left:-.5px !important;
+  background:linear-gradient(180deg, rgba(137,201,37,.58), rgba(137,201,37,.10)) !important;
+}
+.centre-guide::after {
+  bottom:-5px !important;
+  width:10px !important;
+  height:10px !important;
+  margin-left:-5px !important;
+  border-width:2px !important;
 }
 
 /* Older Shield / Enplug fallback if Web Animations is unavailable. */
 html.wave-css-fallback .hour-flow,
 html.wave-css-fallback .hour-col {
   animation-name:waveFallback !important;
-  animation-duration:4s !important;
+  animation-duration:var(--wave-cycle, 5s) !important;
   animation-delay:var(--wave-delay, 0s) !important;
-  animation-timing-function:linear !important;
+  animation-timing-function:cubic-bezier(.42,0,.58,1) !important;
   animation-iteration-count:infinite !important;
   animation-direction:normal !important;
 }
 
 @keyframes waveFallback {
-  0%   { transform:translate3d(0,-390px,0) scaleY(1.80); }
-  50%  { transform:translate3d(0,390px,0) scaleY(1.80); }
-  100% { transform:translate3d(0,-390px,0) scaleY(1.80); }
+  0%   { transform:translate3d(0,-390px,0) scaleY(1.84); }
+  50%  { transform:translate3d(0,390px,0) scaleY(1.84); }
+  100% { transform:translate3d(0,-390px,0) scaleY(1.84); }
 }
 
 @media (prefers-reduced-motion: reduce) {
