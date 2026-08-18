@@ -2,25 +2,24 @@
 .hour-col {
   transform-origin:50% 50%;
   backface-visibility:hidden;
+  overflow:hidden;
 }
 
 .hour-flow::before,
 .hour-col::before {
   content:"";
   position:absolute;
-  inset:-8% 0;
+  inset:-10% 0;
   pointer-events:none;
   background:linear-gradient(
     180deg,
-    rgba(0,0,0,.38) 0%,
-    rgba(0,0,0,.22) 16%,
-    rgba(255,255,255,.04) 30%,
-    rgba(255,255,255,.18) 43%,
-    rgba(255,255,255,.46) 50%,
-    rgba(255,255,255,.18) 57%,
-    rgba(255,255,255,.04) 70%,
-    rgba(0,0,0,.22) 84%,
-    rgba(0,0,0,.40) 100%
+    rgba(0,0,0,.34) 0%,
+    rgba(0,0,0,.18) 18%,
+    rgba(255,255,255,.06) 32%,
+    rgba(255,255,255,.54) 46%,
+    rgba(255,255,255,.18) 58%,
+    rgba(0,0,0,.18) 76%,
+    rgba(0,0,0,.38) 100%
   );
   opacity:.92;
 }
@@ -29,28 +28,86 @@
 .hour-col::after {
   content:"";
   position:absolute;
-  inset:0;
+  inset:-12% 0;
   pointer-events:none;
   background:linear-gradient(
     180deg,
-    rgba(255,255,255,.10) 0%,
-    rgba(255,255,255,0) 32%,
-    rgba(0,0,0,.03) 52%,
-    rgba(0,0,0,.20) 100%
+    rgba(255,255,255,.02) 0%,
+    rgba(255,255,255,.10) 24%,
+    rgba(255,255,255,0) 43%,
+    rgba(0,0,0,.10) 62%,
+    rgba(0,0,0,.24) 100%
   );
+  opacity:.72;
 }
 
 .hour-flow[data-current-hour="true"]::before,
 .hour-col[data-current-hour="true"]::before {
   background:linear-gradient(
     180deg,
-    rgba(255,255,255,.12) 0%,
-    rgba(255,255,255,.22) 22%,
-    rgba(255,255,255,.42) 39%,
-    rgba(255,255,255,.70) 50%,
-    rgba(255,255,255,.42) 61%,
-    rgba(255,255,255,.18) 78%,
-    rgba(0,0,0,.18) 100%
+    rgba(255,255,255,.10) 0%,
+    rgba(255,255,255,.24) 24%,
+    rgba(255,255,255,.72) 46%,
+    rgba(255,255,255,.28) 64%,
+    rgba(0,0,0,.20) 100%
   );
   opacity:1;
+}
+
+/* Tighter moving-panel composition. The 90px left offset compensates for
+   the visually narrower card while preserving the original marker maths. */
+.time-card {
+  left:90px !important;
+  width:1580px !important;
+  grid-template-columns:minmax(0,1fr) 350px !important;
+  gap:18px !important;
+  padding:30px 14px 34px 34px !important;
+}
+.time-card .card-right {
+  padding-left:18px !important;
+  transform:translateY(0) !important;
+}
+.time-card .day {
+  font-size:56px !important;
+}
+.time-card .date {
+  margin-top:14px !important;
+}
+.time-card .state {
+  margin-top:18px !important;
+}
+.time-card .card-pointer {
+  margin-left:-117px !important;
+}
+
+/* Tighter centred card with much less empty side padding. */
+.centre-card {
+  width:1280px !important;
+  padding-left:18px !important;
+  padding-right:18px !important;
+}
+
+/* Older Shield / Enplug fallback if Web Animations is unavailable. */
+html.wave-css-fallback .hour-flow,
+html.wave-css-fallback .hour-col {
+  animation-name:waveFallback !important;
+  animation-duration:4s !important;
+  animation-delay:var(--wave-delay, 0s) !important;
+  animation-timing-function:linear !important;
+  animation-iteration-count:infinite !important;
+  animation-direction:normal !important;
+}
+
+@keyframes waveFallback {
+  0%   { transform:translate3d(0,-390px,0) scaleY(1.80); }
+  50%  { transform:translate3d(0,390px,0) scaleY(1.80); }
+  100% { transform:translate3d(0,-390px,0) scaleY(1.80); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.wave-css-fallback .hour-flow,
+  html.wave-css-fallback .hour-col {
+    animation:none !important;
+    transform:none !important;
+  }
 }
