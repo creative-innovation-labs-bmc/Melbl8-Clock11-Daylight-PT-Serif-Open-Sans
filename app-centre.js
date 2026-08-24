@@ -57,7 +57,9 @@
       for (var h = 0; h < 24; h++) {
         var mark = document.createElement('div');
         mark.className = 'rail-mark' + ((h % 6 === 0) ? ' major' : '');
-        mark.style.left = ((cycle * DAY_W) + (h * HOUR_W) + (HOUR_W / 2)) + 'px';
+        // Hour ticks mark exact hour boundaries. The old half-band offset made
+        // the fixed centre pointer read 30 minutes behind the displayed time.
+        mark.style.left = ((cycle * DAY_W) + (h * HOUR_W)) + 'px';
         var label = document.createElement('span');
         label.textContent = (h % 6 === 0) ? String(h).padStart(2, '0') + ':00' : String(h).padStart(2, '0');
         mark.appendChild(label);
