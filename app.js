@@ -36,6 +36,15 @@
   var zoneEl = document.getElementById('zone');
   var timeline = document.querySelector('.timeline');
 
+  // The arrow and datum share one stage-level transform so nested card motion
+  // cannot make them shear apart while the panel enters or tracks time.
+  var nowMarker = document.createElement('div');
+  nowMarker.id = 'nowMarker';
+  nowMarker.className = 'now-marker';
+  timeCard.parentNode.insertBefore(nowMarker, nowLine);
+  nowMarker.appendChild(cardPointer);
+  nowMarker.appendChild(nowLine);
+
   var lastDateKey = '';
   var solar = null;
 
@@ -281,10 +290,8 @@
   function positionCard(decimal) {
     var markerX = (decimal / 24) * STAGE_W;
     var panelX = Math.max(0, Math.min(STAGE_W - PANEL_W, markerX - PANEL_W / 2));
-    var tipX = markerX - panelX;
     timeCard.style.transform = 'translate3d(' + panelX.toFixed(2) + 'px,0,0)';
-    cardPointer.style.transform = 'translate3d(' + tipX.toFixed(2) + 'px,0,0)';
-    nowLine.style.transform = 'translate3d(' + markerX.toFixed(2) + 'px,0,0)';
+    nowMarker.style.transform = 'translate3d(' + markerX.toFixed(2) + 'px,0,0)';
   }
 
   function update() {

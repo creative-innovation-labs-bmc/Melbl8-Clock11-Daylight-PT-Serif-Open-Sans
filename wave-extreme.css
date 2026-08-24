@@ -83,6 +83,7 @@
   width:310px;
   max-width:310px;
   text-align:left;
+  transform:translateX(8px);
 }
 .time-card .day {
   font-size:46px !important;
@@ -110,11 +111,37 @@
   margin-left:-27px !important;
 }
 
-/* Clear white datum from the pointer to the timeline. */
-.now-line {
-  top:390px !important;
+/* One rigid marker: arrow, white datum and endpoint move together. */
+.now-marker {
+  position:absolute;
+  left:0;
+  top:354px;
+  bottom:63px;
+  width:0;
+  z-index:4;
+  transform:translate3d(0,0,0);
+  transition:transform 1000ms linear;
+  will-change:transform;
+  pointer-events:none;
+}
+.now-marker .card-pointer {
+  left:0 !important;
+  top:0 !important;
+  bottom:auto !important;
+  margin-left:-27px !important;
+  transform:none !important;
+  transition:none !important;
+  will-change:auto !important;
+}
+.now-marker .now-line {
+  left:0 !important;
+  top:36px !important;
+  bottom:0 !important;
   width:3px !important;
   margin-left:-1.5px !important;
+  transform:none !important;
+  transition:none !important;
+  will-change:auto !important;
   background:linear-gradient(
     180deg,
     rgba(255,255,255,.94) 0%,
@@ -122,7 +149,7 @@
     rgba(255,255,255,.26) 100%
   ) !important;
 }
-.now-line span {
+.now-marker .now-line span {
   width:16px !important;
   height:16px !important;
   margin-left:-8px !important;
@@ -221,6 +248,8 @@ html.wave-css-fallback .hour-col {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .now-marker { transition:none !important; }
+
   html.wave-css-fallback .hour-flow,
   html.wave-css-fallback .hour-col {
     animation:none !important;
