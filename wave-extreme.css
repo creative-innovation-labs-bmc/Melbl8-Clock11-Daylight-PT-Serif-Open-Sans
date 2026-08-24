@@ -54,13 +54,15 @@
   opacity:1;
 }
 
-/* Moving panel QC: the visual card and JS positioning maths both use 1760px. */
+/* Moving panel: compact the empty space on both sides of the day/date block.
+   The JS uses the same 1460px width, so the card and pointer stay locked. */
 .time-card {
   left:0 !important;
-  width:1760px !important;
-  grid-template-columns:minmax(0,1fr) 430px !important;
-  gap:24px !important;
-  padding:30px 18px 34px 34px !important;
+  width:1460px !important;
+  grid-template-columns:990px 390px !important;
+  justify-content:center !important;
+  gap:18px !important;
+  padding:30px 18px 34px 26px !important;
   align-items:stretch !important;
 }
 .time-card .card-left {
@@ -71,9 +73,9 @@
 }
 .time-card .card-right {
   min-width:0;
-  width:100%;
+  width:390px;
   overflow:hidden;
-  padding:36px 12px 0 24px !important;
+  padding:36px 0 0 22px !important;
   transform:none !important;
   justify-content:flex-start !important;
   align-items:flex-start !important;
@@ -82,21 +84,21 @@
   max-width:100%;
   font-size:50px !important;
   line-height:.98 !important;
-  letter-spacing:.065em !important;
+  letter-spacing:.06em !important;
   white-space:nowrap !important;
 }
 .time-card .date {
   max-width:100%;
   margin-top:12px !important;
   font-size:25px !important;
-  letter-spacing:.095em !important;
+  letter-spacing:.09em !important;
   white-space:nowrap !important;
 }
 .time-card .state {
   max-width:100%;
   margin-top:16px !important;
   font-size:16px !important;
-  letter-spacing:.17em !important;
+  letter-spacing:.16em !important;
   white-space:nowrap !important;
 }
 .time-card .num {
@@ -105,6 +107,21 @@
 }
 .time-card .card-pointer {
   margin-left:-27px !important;
+}
+
+/* Moving panel NOW datum: clearer, slightly thicker and white. */
+.now-line {
+  top:390px !important;
+  width:3px !important;
+  margin-left:-1.5px !important;
+  background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.32)) !important;
+}
+.now-line span {
+  width:16px !important;
+  height:16px !important;
+  margin-left:-8px !important;
+  border:3px solid rgba(255,255,255,.96) !important;
+  background:#89c925 !important;
 }
 
 /* Centre card QC: explicit equal side padding and optical centring. */
