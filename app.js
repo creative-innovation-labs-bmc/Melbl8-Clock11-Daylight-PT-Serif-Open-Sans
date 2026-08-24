@@ -5,7 +5,7 @@
   var LAT = -37.8183;
   var LON = 144.9467;
   var STAGE_W = 3840;
-  var PANEL_W = 1760;
+  var PANEL_W = 1460;
 
   var params = new URLSearchParams(window.location.search);
   var requestedWave = Number(params.get('wave'));
