@@ -290,6 +290,11 @@
   function positionCard(decimal) {
     var markerX = (decimal / 24) * STAGE_W;
     var panelX = Math.max(0, Math.min(STAGE_W - PANEL_W, markerX - PANEL_W / 2));
+    var cardBottom = timeCard.offsetTop + timeCard.offsetHeight;
+
+    // Use the rendered card height, not the minimum CSS height, so the
+    // triangle's top edge always begins flush beneath the panel border.
+    nowMarker.style.top = cardBottom + 'px';
     timeCard.style.transform = 'translate3d(' + panelX.toFixed(2) + 'px,0,0)';
     nowMarker.style.transform = 'translate3d(' + markerX.toFixed(2) + 'px,0,0)';
   }
