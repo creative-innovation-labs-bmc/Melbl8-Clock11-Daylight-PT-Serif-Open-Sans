@@ -54,15 +54,14 @@
   opacity:1;
 }
 
-/* Moving panel: compact the empty space on both sides of the day/date block.
-   The JS uses the same 1460px width, so the card and pointer stay locked. */
+/* Moving panel: keep the 1460px JS geometry and centre a compact
+   metadata group without padding-based compensation. */
 .time-card {
   left:0 !important;
   width:1460px !important;
-  grid-template-columns:990px 390px !important;
-  justify-content:center !important;
-  gap:18px !important;
-  padding:30px 18px 34px 26px !important;
+  grid-template-columns:minmax(0,1fr) 340px !important;
+  gap:16px !important;
+  padding:30px 12px 34px 26px !important;
   align-items:stretch !important;
 }
 .time-card .card-left {
@@ -73,31 +72,33 @@
 }
 .time-card .card-right {
   min-width:0;
-  width:390px;
+  width:100%;
   overflow:hidden;
-  padding:36px 0 0 22px !important;
+  padding:0 !important;
   transform:none !important;
-  justify-content:flex-start !important;
-  align-items:flex-start !important;
+  justify-content:center !important;
+  align-items:center !important;
+}
+.time-card .card-right > * {
+  width:310px;
+  max-width:310px;
+  text-align:left;
 }
 .time-card .day {
-  max-width:100%;
-  font-size:50px !important;
+  font-size:46px !important;
   line-height:.98 !important;
-  letter-spacing:.06em !important;
+  letter-spacing:.035em !important;
   white-space:nowrap !important;
 }
 .time-card .date {
-  max-width:100%;
   margin-top:12px !important;
-  font-size:25px !important;
-  letter-spacing:.09em !important;
+  font-size:24px !important;
+  letter-spacing:.085em !important;
   white-space:nowrap !important;
 }
 .time-card .state {
-  max-width:100%;
   margin-top:16px !important;
-  font-size:16px !important;
+  font-size:15px !important;
   letter-spacing:.16em !important;
   white-space:nowrap !important;
 }
@@ -109,12 +110,17 @@
   margin-left:-27px !important;
 }
 
-/* Moving panel NOW datum: clearer, slightly thicker and white. */
+/* Clear white datum from the pointer to the timeline. */
 .now-line {
   top:390px !important;
   width:3px !important;
   margin-left:-1.5px !important;
-  background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.32)) !important;
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.94) 0%,
+    rgba(255,255,255,.68) 62%,
+    rgba(255,255,255,.26) 100%
+  ) !important;
 }
 .now-line span {
   width:16px !important;
